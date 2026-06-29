@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#D8EDE2" id="theme-color">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Lüften?">
+<title>Lüften?</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232E7D5B'/%3E%3Cpath d='M6 13h13a3 3 0 1 0-3-3' stroke='white' stroke-width='2.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M6 19h17a3 3 0 1 1-3 3' stroke='white' stroke-width='2.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --page:#E9EFEF; --card:#FFFFFF; --card-2:#F3F8F7;
+  --ink:#16282C; --ink-2:#5C6E70; --ink-3:#90A0A1;
+  --line:rgba(22,40,44,0.10); --line-2:rgba(22,40,44,0.18);
+  --g-bg:#D8EDE2; --g-ink:#1E6B4C; --g-line:#A9D8C2;
+  --a-bg:#F6E9CF; --a-ink:#8A5A11; --a-line:#E3C98A;
+  --r-bg:#F6DEDB; --r-ink:#A63A36; --r-line:#E5ABA6;
+  --warm:#F4ECDD; --cool:#E1EEF1;
+  --font-ui:-apple-system,system-ui,"Segoe UI",Roboto,sans-serif;
+  --font-num:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  --font-voice:ui-serif,Georgia,"Times New Roman",serif;
+  --radius:18px; --r-sm:13px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --page:#0E1517; --card:#16201F; --card-2:#1C2726;
+    --ink:#E7EEEC; --ink-2:#9DABA9; --ink-3:#6E7C7B;
+    --line:rgba(255,255,255,0.09); --line-2:rgba(255,255,255,0.16);
+    --g-bg:#173228; --g-ink:#76D4A8; --g-line:#27513f;
+    --a-bg:#352A10; --a-ink:#E3B65E; --a-line:#5b4a23;
+    --r-bg:#351D1C; --r-ink:#EB9591; --r-line:#5f3432;
+    --warm:#241F16; --cool:#16242A;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;}
+body{
+  background:var(--page); color:var(--ink); font-family:var(--font-ui);
+  line-height:1.45; -webkit-font-smoothing:antialiased;
+  padding:calc(env(safe-area-inset-top) + 10px) max(env(safe-area-inset-right),16px)
+          calc(env(safe-area-inset-bottom) + 24px) max(env(safe-area-inset-left),16px);
+}
+.wrap{max-width:480px; margin:0 auto;}
+.top{display:flex; align-items:baseline; justify-content:space-between; margin:4px 2px 16px;}
+.top h1{font-family:var(--font-voice); font-weight:500; font-size:28px; letter-spacing:-0.01em; margin:0;}
+.top .sub{font-size:13px; color:var(--ink-3); margin:0;}
+
+.hero{
+  border-radius:var(--radius); padding:22px 20px; margin-bottom:14px;
+  background:var(--g-bg); color:var(--g-ink);
+  display:flex; align-items:center; gap:18px; position:relative; overflow:hidden;
+  transition:background .35s ease, color .35s ease;
+}
+.glyph{position:relative; width:62px; height:62px; flex:none;
+  display:flex; align-items:center; justify-content:center;}
+.glyph svg{width:62px; height:62px; stroke:currentColor; fill:none;
+  stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round;}
+.pulse{position:absolute; inset:0; border-radius:50%; border:1.5px solid currentColor;
+  opacity:0; transform:scale(1);}
+.hero.breathing .pulse{animation:breathe 3.4s ease-out infinite;}
+@keyframes breathe{0%{opacity:.5; transform:scale(.9);}70%{opacity:0; transform:scale(1.55);}100%{opacity:0;}}
+.hero .verdict{font-family:var(--font-voice); font-weight:500; font-size:23px;
+  letter-spacing:-0.01em; margin:0 0 3px;}
+.hero .verdict-sub{font-size:13.5px; margin:0; opacity:.92; line-height:1.5;}
+
+.pair{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;}
+.io{border-radius:var(--radius); padding:14px 13px 16px; border:1px solid var(--line);}
+.io.in{background:var(--warm);} .io.out{background:var(--cool);}
+.io h2{font-size:13px; font-weight:600; letter-spacing:.02em; text-transform:uppercase;
+  color:var(--ink-2); margin:0 0 12px; display:flex; align-items:center; gap:6px;}
+.io h2 svg{width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.7;}
+.flabel{font-size:12px; color:var(--ink-3); margin:0 0 4px 2px;}
+.step{display:flex; align-items:center; gap:6px; margin-bottom:12px;}
+.step:last-child{margin-bottom:0;}
+.sbtn{width:34px; height:34px; flex:none; border-radius:10px; border:1px solid var(--line-2);
+  background:var(--card); color:var(--ink); font-size:20px; line-height:1; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; transition:transform .08s, background .15s;}
+.sbtn:active{transform:scale(.92);}
+.sval{flex:1; display:flex; align-items:baseline; justify-content:center; gap:3px;
+  background:var(--card); border:1px solid var(--line); border-radius:10px; padding:4px 2px;}
+.sval input{width:3.2ch; border:0; background:transparent; color:var(--ink);
+  font-family:var(--font-num); font-size:23px; font-weight:500; text-align:right; padding:0;
+  -moz-appearance:textfield;}
+.sval input:focus{outline:none;}
+.sval input::-webkit-outer-spin-button,.sval input::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
+.sval .u{font-family:var(--font-num); font-size:13px; color:var(--ink-3);}
+
+.card{border-radius:var(--radius); padding:15px 16px; border:1px solid var(--line);
+  background:var(--card); margin-bottom:12px;}
+.wall .flabel{margin-bottom:8px;}
+.wall .step{max-width:200px; margin:0 auto;}
+.wall .hint{font-size:11.5px; color:var(--ink-3); margin:10px 0 0; line-height:1.45; text-align:center;}
+
+.mold{display:flex; align-items:center; gap:14px; background:var(--g-bg); border:1px solid var(--g-line);
+  transition:background .35s, border-color .35s;}
+.mold .mi{width:40px; height:40px; flex:none; border-radius:50%; border:1.5px solid currentColor;
+  display:flex; align-items:center; justify-content:center; color:var(--g-ink);}
+.mold .mi svg{width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round;}
+.mold .mt{flex:1;}
+.mold .mh{font-size:15px; font-weight:600; margin:0 0 2px; color:var(--ink);}
+.mold .ms{font-size:12.5px; color:var(--ink-2); margin:0; line-height:1.45;}
+.mold .mrh{font-family:var(--font-num); font-size:25px; font-weight:500; color:var(--ink);}
+.mold .mrh small{font-size:11px; color:var(--ink-3); display:block; text-align:right; font-weight:400;}
+
+details.det{border-radius:var(--radius); border:1px solid var(--line); background:var(--card); overflow:hidden;}
+details.det summary{list-style:none; cursor:pointer; padding:14px 16px; font-size:14px;
+  color:var(--ink-2); display:flex; align-items:center; justify-content:space-between;}
+details.det summary::-webkit-details-marker{display:none;}
+details.det summary .chev{transition:transform .2s;}
+details.det[open] summary .chev{transform:rotate(180deg);}
+.det-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px 14px; padding:2px 16px 16px;}
+.dg{display:flex; flex-direction:column; gap:2px;}
+.dg .dk{font-size:12px; color:var(--ink-3);}
+.dg .dv{font-family:var(--font-num); font-size:18px; font-weight:500;}
+
+.foot{text-align:center; font-size:11px; color:var(--ink-3); margin:18px 4px 0; line-height:1.5;}
+@media (prefers-reduced-motion:reduce){.hero.breathing .pulse{animation:none;}}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Lüften?</h1>
+    <p class="sub">Innen vs. außen</p>
+  </header>
+
+  <section class="hero" id="hero" aria-live="polite">
+    <div class="glyph"><span class="pulse"></span><span id="glyph"></span></div>
+    <div>
+      <p class="verdict" id="verdict">–</p>
+      <p class="verdict-sub" id="verdict-sub">–</p>
+    </div>
+  </section>
+
+  <div class="pair">
+    <div class="io in">
+      <h2><svg viewBox="0 0 24 24"><path d="M4 11l8-6 8 6"/><path d="M6 10v9h12v-9"/></svg>Drinnen</h2>
+      <p class="flabel">Temperatur</p>
+      <div class="step">
+        <button class="sbtn" data-t="ti" data-d="-1" aria-label="Innentemperatur verringern">−</button>
+        <div class="sval"><input id="ti" inputmode="decimal" value="21" data-min="-20" data-max="40" data-step="1"><span class="u">°C</span></div>
+        <button class="sbtn" data-t="ti" data-d="1" aria-label="Innentemperatur erhöhen">+</button>
+      </div>
+      <p class="flabel">Luftfeuchte</p>
+      <div class="step">
+        <button class="sbtn" data-t="hi" data-d="-1" aria-label="Innenfeuchte verringern">−</button>
+        <div class="sval"><input id="hi" inputmode="decimal" value="55" data-min="0" data-max="100" data-step="1"><span class="u">%</span></div>
+        <button class="sbtn" data-t="hi" data-d="1" aria-label="Innenfeuchte erhöhen">+</button>
+      </div>
+    </div>
+    <div class="io out">
+      <h2><svg viewBox="0 0 24 24"><path d="M7 16a4 4 0 1 1 .8-7.9A5 5 0 0 1 18 9a3.5 3.5 0 0 1-.5 7H7z"/></svg>Draußen</h2>
+      <p class="flabel">Temperatur</p>
+      <div class="step">
+        <button class="sbtn" data-t="to" data-d="-1" aria-label="Außentemperatur verringern">−</button>
+        <div class="sval"><input id="to" inputmode="decimal" value="8" data-min="-30" data-max="45" data-step="1"><span class="u">°C</span></div>
+        <button class="sbtn" data-t="to" data-d="1" aria-label="Außentemperatur erhöhen">+</button>
+      </div>
+      <p class="flabel">Luftfeuchte</p>
+      <div class="step">
+        <button class="sbtn" data-t="ho" data-d="-1" aria-label="Außenfeuchte verringern">−</button>
+        <div class="sval"><input id="ho" inputmode="decimal" value="80" data-min="0" data-max="100" data-step="1"><span class="u">%</span></div>
+        <button class="sbtn" data-t="ho" data-d="1" aria-label="Außenfeuchte erhöhen">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card wall">
+    <p class="flabel">Wandtemperatur · kälteste Innenfläche</p>
+    <div class="step">
+      <button class="sbtn" data-t="tw" data-d="-1" aria-label="Wandtemperatur verringern">−</button>
+      <div class="sval"><input id="tw" inputmode="decimal" value="13" data-min="-10" data-max="40" data-step="1"><span class="u">°C</span></div>
+      <button class="sbtn" data-t="tw" data-d="1" aria-label="Wandtemperatur erhöhen">+</button>
+    </div>
+    <p class="hint">Außenecke, Fensterlaibung oder Wand hinter einem Schrank — am besten mit Infrarot-Thermometer messen.</p>
+  </div>
+
+  <div class="card mold" id="mold">
+    <div class="mi" id="mold-icon"></div>
+    <div class="mt">
+      <p class="mh" id="mold-head">–</p>
+      <p class="ms" id="mold-sub">–</p>
+    </div>
+    <div class="mrh"><span id="mold-rh">–</span><small>Wand</small></div>
+  </div>
+
+  <details class="det">
+    <summary>Details
+      <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+    </summary>
+    <div class="det-grid">
+      <div class="dg"><span class="dk">Abs. Feuchte innen</span><span class="dv" id="d-ai">–</span></div>
+      <div class="dg"><span class="dk">Abs. Feuchte außen</span><span class="dv" id="d-ao">–</span></div>
+      <div class="dg"><span class="dk">Taupunkt innen</span><span class="dv" id="d-di">–</span></div>
+      <div class="dg"><span class="dk">Taupunkt außen</span><span class="dv" id="d-do">–</span></div>
+    </div>
+  </details>
+
+  <p class="foot">Näherung nach Magnus-Formel. Werte werden auf diesem Gerät gespeichert.</p>
+</div>
+
+<span class="sr" id="status" aria-live="polite"></span>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var GL={
+    wind:'<svg viewBox="0 0 24 24"><path d="M3 9h12a3 3 0 1 0-3-3"/><path d="M3 15h15a3 3 0 1 1-3 3"/><path d="M3 12h9"/></svg>',
+    alert:'<svg viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v5"/><path d="M12 18h.01"/></svg>',
+    close:'<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M12 4v16M4 12h16"/></svg>',
+    check:'<svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>',
+    drop:'<svg viewBox="0 0 24 24"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg>'
+  };
+  function svp(T){return 6.112*Math.exp((17.62*T)/(243.12+T));}
+  function absHum(T,RH){return svp(T)*RH*2.1674/(273.15+T);}
+  function dew(T,RH){var a=(17.62*T)/(243.12+T)+Math.log(RH/100);return 243.12*a/(17.62-a);}
+  function f1(x){return (Math.round(x*10)/10).toFixed(1);}
+  function clamp(v,mn,mx){return Math.max(mn,Math.min(mx,v));}
+  var IDS=['ti','hi','to','ho','tw'];
+
+  function css(name){return getComputedStyle(document.documentElement).getPropertyValue(name).trim();}
+  function paint(el,key){
+    el.style.background=css('--'+key+'-bg');
+    el.style.color=css('--'+key+'-ink');
+  }
+
+  function save(){
+    try{var o={};IDS.forEach(function(k){o[k]=$(k).value;});localStorage.setItem('lueften',JSON.stringify(o));}catch(e){}
+  }
+  function load(){
+    try{var o=JSON.parse(localStorage.getItem('lueften')||'null');
+      if(o)IDS.forEach(function(k){if(o[k]!=null&&o[k]!=='')$(k).value=o[k];});}catch(e){}
+  }
+
+  function update(){
+    var Ti=parseFloat($('ti').value),Hi=clamp(parseFloat($('hi').value)||0,0,100);
+    var To=parseFloat($('to').value),Ho=clamp(parseFloat($('ho').value)||0,0,100);
+    var Tw=parseFloat($('tw').value);
+    if([Ti,To,Tw].some(function(v){return isNaN(v);}))return;
+
+    var ai=absHum(Ti,Hi),ao=absHum(To,Ho),diff=ai-ao,ad=Math.abs(diff);
+    $('d-ai').textContent=f1(ai)+' g/m³';
+    $('d-ao').textContent=f1(ao)+' g/m³';
+    $('d-di').textContent=f1(dew(Ti,Hi))+' °C';
+    $('d-do').textContent=f1(dew(To,Ho))+' °C';
+
+    var hero=$('hero'),vh=$('verdict'),vs=$('verdict-sub');
+    hero.classList.remove('breathing');
+    if(diff>=1.0){paint(hero,'g');$('glyph').innerHTML=GL.wind;hero.classList.add('breathing');
+      vh.textContent='Jetzt lüften';
+      vs.textContent='Die Außenluft ist '+f1(ad)+' g/m³ trockener — Lüften senkt die Feuchte im Raum.';}
+    else if(diff>=0){paint(hero,'a');$('glyph').innerHTML=GL.alert;
+      vh.textContent='Lüften bringt wenig';
+      vs.textContent='Innen und außen sind fast gleich feucht (nur '+f1(ad)+' g/m³ Unterschied).';}
+    else{paint(hero,'r');$('glyph').innerHTML=GL.close;
+      vh.textContent='Fenster zu lassen';
+      vs.textContent='Die Außenluft ist '+f1(ad)+' g/m³ feuchter — Lüften holt Feuchtigkeit herein.';}
+
+    var wrh=svp(Ti)*Hi/100/svp(Tw)*100;
+    var mold=$('mold'),mi=$('mold-icon');
+    $('mold-rh').textContent=Math.round(wrh)+'%';
+    function mset(key,ic,h,s){
+      mold.style.background=css('--'+key+'-bg');mold.style.borderColor=css('--'+key+'-line');
+      mi.style.color=css('--'+key+'-ink');mi.innerHTML=ic;
+      $('mold-head').textContent=h;$('mold-sub').textContent=s;
+    }
+    if(wrh>=100)mset('r',GL.drop,'Tauwasser an der Wand','Die Raumluft kondensiert an der kalten Fläche.');
+    else if(wrh>=80)mset('a',GL.alert,'Schimmelgefahr','Dauerhaft kritisch — ab 80 % Wandfeuchte droht Schimmel.');
+    else mset('g',GL.check,'Wand unkritisch','An der kältesten Stelle bleibt die Feuchte unter 80 %.');
+
+    $('status').textContent=vh.textContent+'. Wandfeuchte '+Math.round(wrh)+' Prozent.';
+    save();
+  }
+
+  document.querySelectorAll('.sbtn').forEach(function(b){
+    b.addEventListener('click',function(){
+      var inp=$(b.dataset.t),step=parseFloat(inp.dataset.step),
+          mn=parseFloat(inp.dataset.min),mx=parseFloat(inp.dataset.max);
+      var v=parseFloat(inp.value);if(isNaN(v))v=0;
+      v=clamp(Math.round((v+step*parseFloat(b.dataset.d))*10)/10,mn,mx);
+      inp.value=v;update();
+    });
+  });
+  IDS.forEach(function(k){
+    var inp=$(k);
+    inp.addEventListener('input',update);
+    inp.addEventListener('blur',function(){
+      var v=parseFloat(inp.value);
+      if(isNaN(v)){update();return;}
+      inp.value=clamp(v,parseFloat(inp.dataset.min),parseFloat(inp.dataset.max));
+      update();
+    });
+  });
+
+  try{
+    var m={name:"Lüften?",short_name:"Lüften?",display:"standalone",
+      theme_color:"#D8EDE2",background_color:css('--page')||"#E9EFEF",start_url:"."};
+    var lk=document.createElement('link');lk.rel='manifest';
+    lk.href=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:'application/manifest+json'}));
+    document.head.appendChild(lk);
+  }catch(e){}
+
+  load();update();
+})();
+</script>
+</body>
+</html>
