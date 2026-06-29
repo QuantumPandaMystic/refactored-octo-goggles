@@ -90,9 +90,19 @@ body{
 
 .card{border-radius:var(--radius); padding:15px 16px; border:1px solid var(--line);
   background:var(--card); margin-bottom:12px;}
-.wall .flabel{margin-bottom:8px;}
-.wall .step{max-width:200px; margin:0 auto;}
-.wall .hint{font-size:11.5px; color:var(--ink-3); margin:10px 0 0; line-height:1.45; text-align:center;}
+.wall-head{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;}
+.wall-head .flabel{margin:0;}
+.wall .step{max-width:200px; margin:0 auto; transition:opacity .2s;}
+.wall .hint{font-size:11.5px; color:var(--ink-3); margin:10px 0 0; line-height:1.45; text-align:center; transition:opacity .2s;}
+.wall.off .step{opacity:.35; pointer-events:none;}
+.wall.off .hint{opacity:.45;}
+.sw{position:relative; width:46px; height:27px; flex:none; cursor:pointer;}
+.sw input{position:absolute; inset:0; opacity:0; margin:0; cursor:pointer;}
+.sw .track{position:absolute; inset:0; border-radius:14px; background:var(--line-2); transition:background .2s;}
+.sw .knob{position:absolute; top:3px; left:3px; width:21px; height:21px; border-radius:50%;
+  background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.28); transition:transform .2s;}
+.sw input:checked ~ .track{background:var(--g-ink);}
+.sw input:checked ~ .knob{transform:translateX(19px);}
 
 .mold{display:flex; align-items:center; gap:14px; background:var(--g-bg); border:1px solid var(--g-line);
   transition:background .35s, border-color .35s;}
@@ -170,7 +180,13 @@ details.det[open] summary .chev{transform:rotate(180deg);}
   </div>
 
   <div class="card wall">
-    <p class="flabel">Wandtemperatur · kälteste Innenfläche</p>
+    <div class="wall-head">
+      <p class="flabel">Wandtemperatur · kälteste Innenfläche</p>
+      <label class="sw" aria-label="Schimmel-Check ein- oder ausschalten">
+        <input type="checkbox" id="wall-toggle" checked>
+        <span class="track"></span><span class="knob"></span>
+      </label>
+    </div>
     <div class="step">
       <button class="sbtn" data-t="tw" data-d="-1" aria-label="Wandtemperatur verringern">−</button>
       <div class="sval"><input id="tw" inputmode="decimal" value="13" data-min="-10" data-max="40" data-step="1"><span class="u">°C</span></div>
@@ -213,7 +229,8 @@ details.det[open] summary .chev{transform:rotate(180deg);}
     alert:'<svg viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v5"/><path d="M12 18h.01"/></svg>',
     close:'<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M12 4v16M4 12h16"/></svg>',
     check:'<svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>',
-    drop:'<svg viewBox="0 0 24 24"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg>'
+    drop:'<svg viewBox="0 0 24 24"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg>',
+    off:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M7 7l10 10"/></svg>'
   };
   function svp(T){return 6.112*Math.exp((17.62*T)/(243.12+T));}
   function absHum(T,RH){return svp(T)*RH*2.1674/(273.15+T);}
@@ -229,18 +246,19 @@ details.det[open] summary .chev{transform:rotate(180deg);}
   }
 
   function save(){
-    try{var o={};IDS.forEach(function(k){o[k]=$(k).value;});localStorage.setItem('lueften',JSON.stringify(o));}catch(e){}
+    try{var o={};IDS.forEach(function(k){o[k]=$(k).value;});o.wallOn=$('wall-toggle').checked;
+      localStorage.setItem('lueften',JSON.stringify(o));}catch(e){}
   }
   function load(){
     try{var o=JSON.parse(localStorage.getItem('lueften')||'null');
-      if(o)IDS.forEach(function(k){if(o[k]!=null&&o[k]!=='')$(k).value=o[k];});}catch(e){}
+      if(o){IDS.forEach(function(k){if(o[k]!=null&&o[k]!=='')$(k).value=o[k];});
+        if(typeof o.wallOn==='boolean')$('wall-toggle').checked=o.wallOn;}}catch(e){}
   }
 
   function update(){
     var Ti=parseFloat($('ti').value),Hi=clamp(parseFloat($('hi').value)||0,0,100);
     var To=parseFloat($('to').value),Ho=clamp(parseFloat($('ho').value)||0,0,100);
-    var Tw=parseFloat($('tw').value);
-    if([Ti,To,Tw].some(function(v){return isNaN(v);}))return;
+    if([Ti,To].some(function(v){return isNaN(v);}))return;
 
     var ai=absHum(Ti,Hi),ao=absHum(To,Ho),diff=ai-ao,ad=Math.abs(diff);
     $('d-ai').textContent=f1(ai)+' g/m³';
@@ -260,19 +278,30 @@ details.det[open] summary .chev{transform:rotate(180deg);}
       vh.textContent='Fenster zu lassen';
       vs.textContent='Die Außenluft ist '+f1(ad)+' g/m³ feuchter — Lüften holt Feuchtigkeit herein.';}
 
-    var wrh=svp(Ti)*Hi/100/svp(Tw)*100;
-    var mold=$('mold'),mi=$('mold-icon');
-    $('mold-rh').textContent=Math.round(wrh)+'%';
+    var mold=$('mold'),mi=$('mold-icon'),wallOn=$('wall-toggle').checked;
+    document.querySelector('.wall').classList.toggle('off',!wallOn);
     function mset(key,ic,h,s){
       mold.style.background=css('--'+key+'-bg');mold.style.borderColor=css('--'+key+'-line');
       mi.style.color=css('--'+key+'-ink');mi.innerHTML=ic;
       $('mold-head').textContent=h;$('mold-sub').textContent=s;
     }
-    if(wrh>=100)mset('r',GL.drop,'Tauwasser an der Wand','Die Raumluft kondensiert an der kalten Fläche.');
-    else if(wrh>=80)mset('a',GL.alert,'Schimmelgefahr','Dauerhaft kritisch — ab 80 % Wandfeuchte droht Schimmel.');
+    var Tw=parseFloat($('tw').value);
+    if(!wallOn||isNaN(Tw)){
+      mold.style.background=css('--card-2');mold.style.borderColor=css('--line');
+      mi.style.color=css('--ink-3');mi.innerHTML=GL.off;
+      $('mold-head').textContent='Schimmel-Check aus';
+      $('mold-sub').textContent='Wandtemperatur einschalten, um die Schimmelgefahr zu prüfen.';
+      $('mold-rh').textContent='–';
+      $('status').textContent=vh.textContent+'.';
+      save();return;
+    }
+    var wrhRaw=svp(Ti)*Hi/100/svp(Tw)*100, wrhShown=Math.min(100,Math.round(wrhRaw));
+    $('mold-rh').textContent=wrhShown+'%';
+    if(wrhRaw>=100)mset('r',GL.drop,'Tauwasser an der Wand','Die Raumluft kondensiert an der kalten Fläche.');
+    else if(wrhRaw>=80)mset('a',GL.alert,'Schimmelgefahr','Dauerhaft kritisch — ab 80 % Wandfeuchte droht Schimmel.');
     else mset('g',GL.check,'Wand unkritisch','An der kältesten Stelle bleibt die Feuchte unter 80 %.');
 
-    $('status').textContent=vh.textContent+'. Wandfeuchte '+Math.round(wrh)+' Prozent.';
+    $('status').textContent=vh.textContent+'. Wandfeuchte '+wrhShown+' Prozent.';
     save();
   }
 
@@ -295,6 +324,8 @@ details.det[open] summary .chev{transform:rotate(180deg);}
       update();
     });
   });
+
+  $('wall-toggle').addEventListener('change',update);
 
   try{
     var m={name:"Lüften?",short_name:"Lüften?",display:"standalone",
